@@ -18,6 +18,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import re
 import gdb
 from subprocess import check_output, CalledProcessError
@@ -48,7 +49,8 @@ class LoadLinuxKernelInitCommand(gdb.Command):
                                  r"[\s]+(?P<ES>[\S]+)" +
                                  r"[\s]+(?P<Flg>[\S]+)")
 
-        command = r"readelf -WS " + path + r"| grep -E '[[:space:]]+'" + section
+        command = os.environ.get("CROSS_COMPILE") if os.environ.get("CROSS_COMPILE") is not None else ""
+        command = command + r"readelf -WS " + path + r"| grep -E '[[:space:]]+'" + section
         output = check_output([command], shell=True).decode("utf-8")
         obj = re.search(ELF_PATTERN, output)
         if obj is not None:
